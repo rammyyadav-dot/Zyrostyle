@@ -10,26 +10,38 @@
   function setHdr() { var h = document.querySelector('.site-header'); if (h) root.style.setProperty('--hdr', h.offsetHeight + 'px'); }
   setHdr(); window.addEventListener('resize', setHdr);
 
-  // Decorative hero film: respect motion preferences and expose playback control.
+  // Load the film only after the desktop page loads or a visitor asks to play it.
   var film = document.querySelector('.home-hero-video');
   var filmToggle = document.querySelector('.home-hero-toggle');
   if (film && filmToggle) {
     var motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
-    function syncFilmControl() { filmToggle.textContent = film.paused ? 'Play video' : 'Pause video'; }
+    var desktop = window.matchMedia('(min-width: 641px)');
+    function syncFilmControl() {
+      filmToggle.textContent = film.paused ? 'Play video' : 'Pause video';
+    }
+    function playFilm() {
+      if (!film.hasAttribute('src')) film.src = film.dataset.src;
+      film.play().catch(syncFilmControl);
+    }
     function syncMotion() {
-      film.autoplay = !motionPreference.matches;
       filmToggle.hidden = motionPreference.matches;
       if (motionPreference.matches) film.pause();
-      else film.play().catch(function () { syncFilmControl(); });
+    }
+    function autoplayOnDesktop() {
+      if (desktop.matches && !motionPreference.matches && !film.hasAttribute('src')) playFilm();
     }
     filmToggle.addEventListener('click', function () {
-      if (film.paused) film.play().catch(syncFilmControl);
+      if (film.paused) playFilm();
       else film.pause();
     });
+    film.addEventListener('playing', function () { film.classList.add('is-visible'); });
     film.addEventListener('play', syncFilmControl);
     film.addEventListener('pause', syncFilmControl);
+    film.addEventListener('error', function () { film.classList.remove('is-visible'); });
     motionPreference.addEventListener('change', syncMotion);
     syncMotion();
+    if (document.readyState === 'complete') autoplayOnDesktop();
+    else window.addEventListener('load', autoplayOnDesktop, { once: true });
   }
 
   // ── Mobile navigation ────────────────────────────────────────────────

@@ -37,7 +37,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Barlow:wght@300;400;500&family=Barlow+Condensed:wght@400;500&family=Inter+Tight:wght@400;500;600;700;800&display=swap">
-<link rel="stylesheet" href="assets/css/style.css?v=2e8e40dc">
+<link rel="stylesheet" href="assets/css/style.css?v=518ccc51">
 <script type="application/ld+json">
 {
  "@context": "https://schema.org",
@@ -299,9 +299,8 @@
 </header>
 <main id="main">
 <section class="home-hero" aria-labelledby="home-title">
-  <video class="home-hero-video" autoplay muted loop playsinline preload="metadata" poster="assets/img/home-hero-poster.webp" aria-hidden="true" tabindex="-1">
-    <source src="assets/video/home-hero.mp4" type="video/mp4">
-  </video>
+  <img class="home-hero-poster" src="assets/img/home-hero-poster.webp" alt="" fetchpriority="high">
+  <video class="home-hero-video" muted loop playsinline preload="none" data-src="assets/video/home-hero.mp4" aria-hidden="true" tabindex="-1"></video>
   <div class="home-hero-shade" aria-hidden="true"></div>
   <div class="home-hero-content">
     <p class="home-hero-eyebrow">Content-led marketing. Clear scope. Transparent reporting.</p>
@@ -309,7 +308,7 @@
     <p class="home-hero-lead">We help businesses in Patna and across Bihar turn search visibility into enquiries with local SEO, content, social media and paid campaigns.</p>
     <a class="pill-btn home-hero-cta" href="contact/">Book a free consultation <span aria-hidden="true">↗</span></a>
   </div>
-  <button class="home-hero-toggle" type="button" hidden>Pause video</button>
+  <button class="home-hero-toggle" type="button" hidden>Play video</button>
 </section>
 <section class="bw" id="services">
   <div class="bw-wrap">
@@ -508,6 +507,6 @@
 </div>
 
 <script src="assets/js/measurement.js?v=56bfcf53" defer></script>
-<script src="assets/js/main.js?v=e30083b2" defer></script>
+<script src="assets/js/main.js?v=a189d49f" defer></script>
 </body>
 </html>

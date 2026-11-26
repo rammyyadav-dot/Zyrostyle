@@ -715,9 +715,8 @@ def build_home():
     # 1 ── HERO: one message and one action over the uploaded film.
     body += f"""<main id="main">
 <section class="home-hero" aria-labelledby="home-title">
-  <video class="home-hero-video" autoplay muted loop playsinline preload="metadata" poster="{ctx.asset('img/home-hero-poster.webp')}" aria-hidden="true" tabindex="-1">
-    <source src="{ctx.asset('video/home-hero.mp4')}" type="video/mp4">
-  </video>
+  <img class="home-hero-poster" src="{ctx.asset('img/home-hero-poster.webp')}" alt="" fetchpriority="high">
+  <video class="home-hero-video" muted loop playsinline preload="none" data-src="{ctx.asset('video/home-hero.mp4')}" aria-hidden="true" tabindex="-1"></video>
   <div class="home-hero-shade" aria-hidden="true"></div>
   <div class="home-hero-content">
     <p class="home-hero-eyebrow">Content-led marketing. Clear scope. Transparent reporting.</p>
@@ -725,7 +724,7 @@ def build_home():
     <p class="home-hero-lead">We help businesses in Patna and across Bihar turn search visibility into enquiries with local SEO, content, social media and paid campaigns.</p>
     <a class="pill-btn home-hero-cta" href="{ctx.href('contact')}">Book a free consultation <span aria-hidden="true">↗</span></a>
   </div>
-  <button class="home-hero-toggle" type="button" hidden>Pause video</button>
+  <button class="home-hero-toggle" type="button" hidden>Play video</button>
 </section>
 """
     # 2 ── WHAT WE DO (compact image grid)
