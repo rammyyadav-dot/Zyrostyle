@@ -181,6 +181,11 @@ def service_schema(name, slug, service_type, desc):
 def head(ctx, title, desc, keywords, schema, robots="index, follow, max-image-preview:large"):
     url = canonical(ctx.slug)
     og_img = BASE + "/assets/img/og-image.png"
+    search_links = f"""<link rel="canonical" href="{url}">
+<link rel="alternate" hreflang="en-IN" href="{url}">
+<link rel="alternate" hreflang="x-default" href="{url}">""" if schema else ""
+    social_url = f'<meta property="og:url" content="{url}">' if schema else ""
+    structured_data = f'<script type="application/ld+json">\n{schema}\n</script>' if schema else ""
     return f"""<!DOCTYPE html>
 <html lang="en-IN">
 <head>
@@ -192,9 +197,7 @@ def head(ctx, title, desc, keywords, schema, robots="index, follow, max-image-pr
 <meta name="robots" content="{robots}">
 <meta name="author" content="{SITE['name']}">
 <meta name="ga4-measurement-id" content="{esc(SITE['ga4_measurement_id'])}">
-<link rel="canonical" href="{url}">
-<link rel="alternate" hreflang="en-IN" href="{url}">
-<link rel="alternate" hreflang="x-default" href="{url}">
+{search_links}
 <!-- GEO tags: Patna, Bihar, India -->
 <meta name="geo.region" content="{SITE['region_code']}">
 <meta name="geo.placename" content="{SITE['locality']}, {SITE['region']}, India">
@@ -206,7 +209,7 @@ def head(ctx, title, desc, keywords, schema, robots="index, follow, max-image-pr
 <meta property="og:site_name" content="{SITE['name']}">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
-<meta property="og:url" content="{url}">
+{social_url}
 <meta property="og:image" content="{og_img}">
 <meta property="business:contact_data:locality" content="{SITE['locality']}">
 <meta property="business:contact_data:region" content="{SITE['region']}">
@@ -221,9 +224,7 @@ def head(ctx, title, desc, keywords, schema, robots="index, follow, max-image-pr
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="{FONTS}">
 <link rel="stylesheet" href="{ctx.asset('css/style.css')}?v={_ver('css/style.css')}">
-<script type="application/ld+json">
-{schema}
-</script>
+{structured_data}
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to content</a>
@@ -317,10 +318,16 @@ def wa_widget():
 """
 
 
+def email_link():
+    email = esc(SITE["email"])
+    # Keep the public contact address clickable without Cloudflare's decode route.
+    return f'<!--email_off--><a href="mailto:{email}">{email}</a><!--/email_off-->'
+
+
 def footer(ctx):
     svc = "".join(f'<li><a href="{ctx.href(s["slug"])}">{s["nav"]}</a></li>' for s in SERVICES)
     svc += f'<li><a href="{ctx.href(AI_SEARCH["slug"])}">GEO &amp; AEO</a></li>'
-    contact = f'<li><a href="mailto:{SITE["email"]}">{SITE["email"]}</a></li>'
+    contact = f'<li>{email_link()}</li>'
     if SITE["phone"]:
         contact += f'<li><a href="tel:{SITE["phone"].replace(" ", "")}">{SITE["phone"]}</a></li>'
     addr = ", ".join(x for x in [SITE["street"], SITE["locality"], SITE["region"], SITE["postal_code"]] if x)
@@ -698,7 +705,7 @@ def write(slug, body, priority="0.8"):
 def build_home():
     ctx = Ctx("")
     title = "Digital Marketing & SEO Agency in Patna | Zyrostyle"
-    desc = "Grow your Patna business with SEO, content, social media and Google Ads. Get a tailored marketing plan from Zyrostyle. Book your free consultation."
+    desc = "Zyrostyle helps Patna and Bihar businesses get found and generate enquiries through local SEO, content, social media and ads. Book a free consultation."
     kw = ("digital marketing agency in patna, best digital marketing company in patna, seo company in patna, "
           "content marketing agency in patna, social media marketing agency in patna, digital marketing services patna, "
           "seo services in patna, top digital marketing agency in patna, lead generation agency in patna, bihar")
@@ -715,7 +722,7 @@ def build_home():
   <div class="home-hero-content">
     <p class="home-hero-eyebrow">Content-led marketing. Clear scope. Transparent reporting.</p>
     <h1 id="home-title" aria-label="WE DO BIG THINGS">WE<br>DO<br><span>BIG<br>THINGS</span></h1>
-    <p class="home-hero-lead">We solve big problems with strategy and creative that make a big impact</p>
+    <p class="home-hero-lead">We help businesses in Patna and across Bihar turn search visibility into enquiries with local SEO, content, social media and paid campaigns.</p>
     <a class="pill-btn home-hero-cta" href="{ctx.href('contact')}">Book a free consultation <span aria-hidden="true">↗</span></a>
   </div>
   <button class="home-hero-toggle" type="button" hidden>Pause video</button>
@@ -814,7 +821,7 @@ def build_home():
 """
     body += f"""<section class="section warm">
   <div class="wrap">
-    <h2 class="h-md">Choose the right marketing starting point</h2>
+    <h2 class="h-md">Where should your business start with digital marketing?</h2>
     <p>Compare goals and scope before choosing a channel. Your proposal should confirm deliverables and separate agency fees, advertising spend and production costs.</p>
     <div class="comparison-scroll" role="region" aria-label="Marketing service comparison" tabindex="0">
       <table class="service-comparison">
@@ -950,7 +957,13 @@ def build_services_hub():
     body += hero(ctx, "Digital Marketing Services in Patna", "Digital marketing services in Patna — <em>everything your brand needs to grow.</em>",
                  "One growth partner. Six connected marketing capabilities. We connect content, search, creativity and paid media to build a complete digital growth engine for businesses in Patna, Bihar and across India.",
                  crumbs, ctas=[("Get Your Free Consultation", "contact", "btn-light"), ("Explore Industries", "industries", "btn-line")])
-    body += f'<section class="section"><div class="wrap">{service_cards(ctx)}</div></section>\n'
+    body += f"""<section class="section" aria-labelledby="service-capabilities">
+  <div class="wrap">
+    <div class="section-head single"><h2 class="h-lg" id="service-capabilities">Explore our digital marketing services</h2></div>
+    {service_cards(ctx)}
+  </div>
+</section>
+"""
     groups = []
     for key, title, parent, pages in CLUSTERS:
         items = "".join(f'<li><a href="{ctx.href(p["slug"])}">{p["nav"]}</a></li>' for p in pages)
@@ -1169,7 +1182,7 @@ def build_contact():
     body += hero(ctx, "Free Marketing Consultation", "Let's build your next <em>growth story.</em>",
                  "Your next customer could already be searching for a business like yours. Tell us about your goals and a Zyrostyle strategist will respond within one working day.",
                  crumbs, ctas=[("Start Below", "#consultation", "btn-light")])
-    rows = f'<dt>Email</dt><dd><a href="mailto:{SITE["email"]}">{SITE["email"]}</a></dd>'
+    rows = f'<dt>Email</dt><dd>{email_link()}</dd>'
     if SITE["phone"]:
         rows += f'<dt>Phone</dt><dd><a href="tel:{SITE["phone"].replace(" ", "")}">{SITE["phone"]}</a></dd>'
     if SITE["whatsapp"]:
@@ -1208,13 +1221,14 @@ def build_privacy():
     body += hero(ctx, "Legal", "Privacy <em>Policy.</em>", "Last updated: " + date.fromisoformat(SITE["privacy_updated"]).strftime("%d %B %Y"), crumbs,
                  ctas=[("Contact Us", "contact", "btn-light")])
     body += f"""<section class="section"><div class="wrap prose">
+<h2 class="h-sm">How we handle your information</h2>
 <p><strong>Who we are.</strong> Zyrostyle is a digital marketing agency based in Patna, Bihar, India. This policy explains how we handle personal information submitted through this website.</p>
 <p><strong>Information we collect.</strong> When you submit an enquiry, we collect the details you provide — such as your name, company, website, phone/WhatsApp number, email address, services of interest, budget range and business goals.</p>
 <p><strong>How we use it.</strong> We use this information only to respond to your enquiry, prepare proposals and provide services you request. We do not sell your personal information.</p>
 <p><strong>Analytics and cookies.</strong> Our hosting provider supplies aggregate traffic analytics. The website prepares interaction events without including form details, message text or full link URLs. Optional analytics collection requires a configured provider and your analytics consent. If you allow analytics, session storage keeps the landing page and broad acquisition channel so later handoffs can be attributed. A WhatsApp or email handoff does not confirm that an enquiry was sent. You can change analytics consent using the controls below.</p>
 <p><button class="btn btn-dark btn-sm" type="button" data-analytics-consent="grant">Allow optional analytics</button> <button class="btn btn-dark btn-sm" type="button" data-analytics-consent="deny">Decline optional analytics</button></p><p id="analytics-consent-status" role="status" aria-live="polite"></p>
 <p><strong>Data retention and security.</strong> We keep enquiry information only as long as needed for the purposes above and apply reasonable safeguards to protect it, in line with applicable Indian law, including the Digital Personal Data Protection Act, 2023.</p>
-<p><strong>Your rights.</strong> You may request access to, correction of, or deletion of your personal information by emailing <a href="mailto:{SITE['email']}">{SITE['email']}</a>.</p>
+<p><strong>Your rights.</strong> You may request access to, correction of, or deletion of your personal information by emailing {email_link()}.</p>
 <p><strong>Changes.</strong> We may update this policy from time to time. The latest version will always be available on this page.</p>
 </div></section>
 """
@@ -1227,9 +1241,9 @@ def build_404():
     ctx.pre = "/"  # served from any depth by the host, so use root-relative links
     title = "Page Not Found | Zyrostyle"
     desc = "The page you were looking for could not be found."
-    body = head(ctx, title, desc, "", page_schema(ctx, title, desc, None), robots="noindex, follow") + nav(ctx)
+    body = head(ctx, title, desc, "", None, robots="noindex, follow") + nav(ctx)
     body += '<main id="main">\n'
-    body += hero(ctx, "404", "This page got lost. <em>Your customers shouldn't.</em>",
+    body += hero(ctx, "404", "Page <em>not found.</em>",
                  "The page you were looking for doesn't exist or has moved. Let's get you back on track.",
                  ctas=[("Back to Home", "", "btn-light"), ("Explore Services", "services", "btn-line")], sub=False, photo="creative-idea-bulb")
     body += "</main>\n" + footer(ctx)
