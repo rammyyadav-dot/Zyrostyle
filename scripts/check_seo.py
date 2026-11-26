@@ -36,15 +36,16 @@ def check():
     for file in pages:
         s = file.read_text(); p = Page(); p.feed(s)
         slug = '' if file.parent == ROOT else file.parent.name + '/'
-        assert p.canonical == [BASE + '/' + slug], file
+        if file.name == '404.html':
+            assert not p.canonical and not p.json and 'noindex' in p.meta['robots'], file
+        else:
+            assert p.canonical == [BASE + '/' + slug] and p.json, file
         assert p.h1 == 1 and p.title and p.meta.get('description'), file
-        assert p.json, file
         assert 'https://www.zyrostyle.com' not in s, file
         assert 'award-winning' not in s.lower(), file
         assert s.count('js/measurement.js') == 1, file
         titles.append(p.title); descriptions.append(p.meta['description'])
         if file.name != '404.html': urls.add(p.canonical[0])
-        else: assert 'noindex' in p.meta['robots']
         for href in p.links:
             u = urlsplit(href)
             if u.netloc and u.hostname != 'zyrostyle.com' or u.scheme and u.scheme not in ('http', 'https'): continue
